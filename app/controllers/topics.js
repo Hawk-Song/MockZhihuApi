@@ -1,7 +1,7 @@
 const Topic = require('../models/topics');
-
+const User = require('../models/users');
 class TopicsCtl { 
-    async checkTopicExist(ctx) {
+    async checkTopicExist(ctx, next) {
         const topic = await Topic.findById(ctx.params.id);
         if (!topic) {ctx.throw(404, "Topic does not exist");}
         await next();

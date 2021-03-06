@@ -68,6 +68,22 @@ class UsersCtl {
 
     }
 
+    async listFollowing(ctx) {
+        const user = await (await User.findById(ctx.params.id).select('+following').populate('following'));
+        console.log(user);
+        if(!user) {ctx.throw(404);}
+        ctx.body = user.following;
+    }
+
+    async follow(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+following');
+        if (!me.following.map(id => id.toString()).includes(ctx.params.id)) {
+            me.following.push(ctx.params.id);
+            me.save();
+        }
+        ctx.status = 204;
+    }
+
 }
 
 module.exports = new UsersCtl();

@@ -9,7 +9,9 @@ const {
     update,
     delete: del,
     login,
-    checkOwner
+    checkOwner,
+    listFollowing,
+    follow
 } = require('../controllers/users')
 
 const {secret} = require('../config');
@@ -26,5 +28,9 @@ router.patch('/:id', auth, update);
 router.delete('/:id', auth, checkOwner, del);
 
 router.post('/login', login);
+
+router.get('/:id/following', listFollowing);
+
+router.put('/following/:id', auth, follow);
 
 module.exports = router;

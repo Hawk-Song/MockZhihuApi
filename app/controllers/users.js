@@ -12,7 +12,16 @@ class UsersCtl {
     async findById(ctx){
         const {fields} = ctx.query;
         const selectFields = fields.split(';').filter(f => f).map(f => ' +' + f).join('');
-        const user = await (await User.findById(ctx.params.id).select(selectFields));
+        const populateStr = fields.split(';').filter(f => f).map(f => {
+            if (f === 'employments') {
+                return 'employements.company employements.job';
+            }
+            if (f === 'educations') {
+                return 'education.school education.major';
+            }
+            return f;
+        }).join(' ');
+        const user = await User.findById(ctx.params.id).select(selectFields).populate(populateStr);
         if (!user) {ctx.throw(404, 'User donot exists')}
         ctx.body = user;
     }
@@ -72,7 +81,7 @@ class UsersCtl {
     }
 
     async listFollowing(ctx) {
-        const user = await (await User.findById(ctx.params.id).select('+following').populate('following'));
+        const user = await User.findById(ctx.params.id).select('+following').populate('following');
         console.log(user);
         if(!user) {ctx.throw(404);}
         ctx.body = user.following;

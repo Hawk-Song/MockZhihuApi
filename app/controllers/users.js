@@ -1,4 +1,6 @@
+const jsonwebtoken = require('jsonwebtoken');
 const User = require('../models/users');
+const {secret} = require('../config');
 
 class UsersCtl { 
     async find(ctx) { //find all users
@@ -34,6 +36,19 @@ class UsersCtl {
         const user = await User.findByIdAndRemove(ctx.params.id);
         if (!user) {ctx.throw(404, 'User does not exist!')}
         ctx.status = 204;
+    }
+
+    async login(ctx) {
+        ctx.verifyParams({
+            name: {type: 'string', required: true},
+            password: {type: 'string', required: true}
+        });
+        const user = await User.findOne(ctx.request.body);
+        if (!user) {ctx.throw(401, 'User does not exist!')};
+        const {_id, name} = user;
+        const token = jsonwebtoken.sign({_id, name}, secret, {expiresIn: '1d'});
+        ctx.body = {token};
+
     }
 
 }

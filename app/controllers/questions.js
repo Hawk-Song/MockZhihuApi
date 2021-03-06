@@ -1,5 +1,4 @@
 const Question = require('../models/questions');
-const User = require('../models/users');
 class QuestionsCtl { 
     async checkQuestionExist(ctx, next) {
         const question = await Question.findById(ctx.params.id).select('+questioner');
@@ -56,11 +55,6 @@ class QuestionsCtl {
     async delete(ctx) {
         await Question.findByIdAndRemove(ctx.params.id);
         ctx.status = 204;
-    }
-
-    async listTopicsFollowers(ctx) {
-        const users = await User.find({followingTopics: ctx.params.id});
-        ctx.body = users;
     }
 }
 

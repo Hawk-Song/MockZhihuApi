@@ -1,6 +1,7 @@
 const jsonwebtoken = require('jsonwebtoken');
 const User = require('../models/users');
 const Question = require('../models/questions');
+const Answers = require('../models/answers');
 const {secret} = require('../config');
 
 class UsersCtl { 
@@ -149,6 +150,62 @@ class UsersCtl {
         ctx.body = questions;
     }
 
+
+    async listLikingAnswers(ctx) {
+        const user = await User.findById(ctx.params.id).select('+likengAnswers').populate('likingAnswers');
+        if(!user) {ctx.throw(404);}
+        ctx.body = user.likengAnswers;
+    }
+
+    async likeAnswer(ctx, next) {
+        const me = await User.findById(ctx.state.user._id).select('+likengAnswers');
+        if (!me.likengAnswers.map(id => id.toString()).includes(ctx.params.id)) {
+            me.likengAnswers.push(ctx.params.id);
+            me.save();
+            await Answer.findByIdAndUpdate(ctx.params.id, {$inc: {voteCount: 1}});
+        }
+        ctx.status = 204;
+        await next();
+    }
+
+    async unLikeAnswer(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+likengAnswers');
+        const index = me.likengAnswers.map(id => id.toString()).indexOf(ctx.params.id);
+        if (index > -1) { 
+            me.likengAnswers.splice(index, 1);
+            me.save();
+            await Answer.findByIdAndUpdate(ctx.params.id, {$inc: {voteCount: -1}});
+        }
+        ctx.status = 204;
+    }
+
+    async listDisLikingAnswers(ctx) {
+        const user = await User.findById(ctx.params.id).select('+dislikengAnswers').populate('dislikengAnswers');
+        if(!user) {ctx.throw(404);}
+        ctx.body = user.dislikengAnswers;
+    }
+
+    async dislikeAnswer(ctx, next) {
+        const me = await User.findById(ctx.state.user._id).select('+dislikengAnswers');
+        if (!me.dislikengAnswers.map(id => id.toString()).includes(ctx.params.id)) {
+            me.dislikengAnswers.push(ctx.params.id);
+            me.save();
+            await Answer.findByIdAndUpdate(ctx.params.id, {$inc: {voteCount: 1}});
+        }
+        ctx.status = 204;
+        await next();
+    }
+
+    async undisLikeAnswer(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+dislikengAnswers');
+        const index = me.dislikengAnswers.map(id => id.toString()).indexOf(ctx.params.id);
+        if (index > -1) { 
+            me.dislikengAnswers.splice(index, 1);
+            me.save();
+        }
+        ctx.status = 204;
+    }
+    
 }
 
 module.exports = new UsersCtl();

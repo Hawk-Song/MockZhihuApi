@@ -17,10 +17,13 @@ const {
     checkUserExist,
     followTopic,
     unfollowTopic,
-    listFollowingTopics, listQuestions
+    listFollowingTopics, listQuestions,
+    listLikingAnswers, likeAnswer, unLikeAnswer,
+    listDisLikingAnswers, dislikeAnswer, undisLikeAnswer
 } = require('../controllers/users')
 
 const {checkTopicExist} = require('../controllers/topics');
+const {checkAnswerExist} = require('../controllers/answers');
 
 const {secret} = require('../config');
 const auth = jwt({secret});
@@ -40,17 +43,21 @@ router.post('/login', login);
 router.get('/:id/following', listFollowing);
 
 router.put('/following/:id', auth, checkUserExist, follow);
-
 router.delete('/following/:id', auth, checkUserExist, unfollow);
-
 router.get('/:id/followers', auth, listFollowers);
 
 router.get('/:id/followingTopics', auth, listFollowingTopics);
 router.put('/followingTopics/:id', auth, checkTopicExist, followTopic);
-
 router.delete('/followingTopics/:id', auth, checkTopicExist, unfollowTopic);
 
 router.get('/:id/questions', auth, listQuestions);
 
+router.get('/:id/likingAnswers', auth, listLikingAnswers);
+router.put('/likingAnswers/:id', auth, checkAnswerExist, likeAnswer, undisLikeAnswer);
+router.delete('/likingAnswers/:id', auth, checkAnswerExist, unLikeAnswer);
+
+router.get('/:id/dislikingAnswers', auth, listDisLikingAnswers);
+router.put('/dislikingAnswers/:id', auth, checkAnswerExist, dislikeAnswer, likeAnswer);
+router.delete('/dislikingAnswers/:id', auth, checkAnswerExist, undisLikeAnswer);
 
 module.exports = router;
